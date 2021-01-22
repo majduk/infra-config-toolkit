@@ -113,6 +113,14 @@ def set_apt_sources(connection, config):
     os.unlink(fname)
 
 
+def set_ntp(connection, config):
+    pass
+
+
+def disable_cloud_init(connection):
+    connection.sudo('touch /etc/cloud/cloud-init.disabled')
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     if not os.path.isdir('ssh'):
@@ -120,13 +128,17 @@ if __name__ == '__main__':
     with open('infra.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
     for host in config['hosts']:
-        prepare_ssh_key(host, config['hosts'][host])
+        prepare_ssh_key(host, config['hosts'][host]['ssh'])
     for host in config['hosts']:
+        host_config = Config()
         if 'connect_kwargs' in config['hosts'][host]['ssh']:
             passwd = config['hosts'][host]['ssh']['connect_kwargs']['password']
             host_config = Config(overrides={'sudo': {'password': passwd}})
         with Connection(config=host_config,
                         **config['hosts'][host]['ssh']) as con:
+            con.reboot_required = False
+            # disable cloud-init
+            disable_cloud_init(con)
             # SSH setup
             copy_ssh_key(con, host)
             # Sudo setup
@@ -156,5 +168,6 @@ if __name__ == '__main__':
             # Update the system
             con.sudo('apt upgrade -y')
             # TODO: NTP setup
-            # TODO: Setup bcache
+            if 'ntp' in config:
+                set_ntp(con, config['ntp'])
             # Reboot

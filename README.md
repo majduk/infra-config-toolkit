@@ -1,5 +1,8 @@
 # infra-config-toolkit
-Infrastructure node configuration Fabric toolkit.
+Infrastructure node configuration Python Fabric based toolkit.
+
+Proof of concept state.
+Consider looking at [Aircraft](https://github.com/relaxdiego/aircraft) project for more comprehensive solution.
 
 # Introduction
 The tool configures infrastructure nodes by running following steps:
@@ -26,11 +29,16 @@ If configuration provided, renders `/etc/apt/sources.list`
 Upgrades all the system packages.
 ## NTP setup
 If configuration provided, installs and configures NTP.
-## Setup bcache
-If configuration provided, sets up bcache.
 
 # Usage:
 1. Clone the tool to `~/deploy`
+1. Install dependencies:
+```
+sudo apt install -y python3-pip
+sudo pip3 install fabric
+sudo pip3 install fabric2
+sudo pip3 install decorator
+```
 1. Create configuration directory:
 ```
 mkdir ~/env-name
